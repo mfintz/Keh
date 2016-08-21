@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Average working hours in a week according to OECD</title>
+	<style>
+		p {color:gray; position: relative; left: 320px; font-size: 25px;}
+	</style>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	</head>
+	<body>
+		<p>Average working hours in a week according to OECD</p>
+		<form id="sexForm" >
+			    Men<input type="radio" name="sex"  autocomplete="off" checked>
+			    Women<input type="radio" name="sex"  autocomplete="off"> 
+			    Both<input type="radio" name="sex"  autocomplete="off"> 
+		</form>
+		<script >
+		var selectedSex="";
+		function mySexFunction() 
+		{
+		    var x1 = document.getElementById("sexForm").elements.item(0).checked;
+   		    var x2 = document.getElementById("sexForm").elements.item(1).checked;
+   		    var x3 = document.getElementById("sexForm").elements.item(2).checked;
+		    if (x1.toString()=="true")
+		    {
+		    	selectedSex = "MEN";
+		    }
+		    if (x2.toString()=="true")
+		    {
+		       	selectedSex = "WOMEN";
+		    }
+		    if (x3.toString()=="true")
+		    {
+		    	selectedSex = "MW";
+		    }
+		}
+
+		mySexFunction();
+		console.log(selectedSex);
+		var canvas = d3.select("body").append("svg")
+				.attr("width", 1800)
+				.attr("height", 1800)
+				.append("g")
+				.attr("transform", "translate(100,100)");
+		var color = d3.scale.category20();
+
+		var xAxis = 0, yAxis = 0, xAxisName = 0, yAxisName = 0, placeInSort = 0, placeInSortY = 0;
+		var firstArcXAngle = 0, firstArcYAngle = 0, xZero = 550, yZero = 500, cx, cy;
+		var secondArcXAngle = 0, secondArcYAngle = 0, thirdArcXAngle = 0, thirdArcYAngle = 0;
+				
+		// Converts from degrees to radians.
+		Math.radians = function(degrees) {
+		  return degrees * Math.PI / 180;
+		};
+		 
+		// Converts from radians to degrees.
+		Math.degrees = function(radians) {
+		  return radians * 180 / Math.PI;
+		};
+
+		d3.csv("finalAll.csv", function (data)
+		{
+			  var coefficientOfScale = 1.5;
+			  var locationsX = [], locationsY = [];
+			  data = data.filter(function(d) 
+			  { 
+			     if(d["SEX"] == selectedSex.toString() && d["JOBTYPE"] == "TED" && d["TIME"] == "2014" && 
+			     	d["Employment status"] == "Total employment" && d["Age"] == "Total") 
+			     { 
+			         console.log(d.Country);
+			         return d;
+			     }
+			  })		  
+			  data.sort(function(x, y){
+					return d3.descending(x.Value, y.Value);
+			  })
+			  var minValue = parseInt(data[data.length - 1].Value); 
+			  var maxValue = parseInt(data[0].Value); 
+
+			  var maxRadius = coefficientOfScale * maxValue;
+
+			  var colorFirstArcScale = d3.scale.linear()
+							.domain([data[6].Value,data[0].Value])
+							.range(["#33F6FF","red"]);
+
+			  var colorSecondArcScale = d3.scale.linear()
+							.domain([data[18].Value,data[7].Value])
+							.range(["#33F6FF","red"]);
+
+			  var colorThirdArcScale = d3.scale.linear()
+							.domain([minValue,data[19].Value])
+							.range(["#33F6FF","red"]);
+
+			  var colorScale = d3.scale.linear()
+						.domain([minValue,maxValue])
+						.range(["#33F6FF","red"]);
+			  
+			  var scale = d3.scale.linear()
+							.domain([minValue,maxValue])
+							.range([1,85]);
+			  
+			  var fontScale = d3.scale.linear()
+			  				.domain([minValue,maxValue])
+			  				.range(["6px","18px"]);
+
+			  var circles = canvas.selectAll("circle")
+                          .data(data)
+                          .enter()
+                          .append("g")
+                          .attr("class", "circle");
+				circles.append("circle")
+	               .attr("cx", function(d) {
+	               		cx = xZero;
+	               		if(placeInSort >= 1 && placeInSort < 7)
+	               		{
+	               			//console.log("firstArcXAngle is " + firstArcXAngle + ", angle x is: " + firstArcXAngle);
+	               			cx = parseInt(xZero + (2.2 * maxRadius + 20)*(Math.cos(Math.radians(firstArcXAngle))));
+	               			//console.log("cx is " + cx)
+	               			firstArcXAngle += 60;
+	               		}
+	               		if(placeInSort >= 7 && placeInSort < 19)
+	               		{
+	               			//console.log("secondArcXAngle is " + secondArcXAngle + ", angle x is: " + secondArcXAngle);
+	               			cx = parseInt(xZero + (coefficientOfScale * 2.8 * maxRadius + 30)*(Math.cos(Math.radians(secondArcXAngle))));
+	               			//console.log("cx is " + cx)
+	               			secondArcXAngle += 30;
+	               		}
+	               		if(placeInSort >= 19)
+	               		{
+	               			//console.log("thirdArcXAngle is " + thirdArcXAngle + ", angle x is: " + thirdArcXAngle);
+	               			cx = parseInt(xZero + (6 * maxRadius + 30)*(Math.cos(Math.radians(thirdArcXAngle))));
+	               			//console.log("cx is " + cx)
+	               			thirdArcXAngle += 15;
+	               		}
+	               		//console.log("placeInSort: " + placeInSort)
+	               		locationsX[placeInSort] = cx
+	               		placeInSort += 1;  
+	               		return cx; 
+	               	})
+	               .attr("cy", function(d) { 
+						cy = yZero;
+						placeInSort = 0;
+	               		if(placeInSortY >= 1 && placeInSortY < 7)
+	               		{
+	               			//console.log("firstArcYAngle is " + firstArcYAngle + ", angle y is: " + firstArcYAngle);
+	               			cy = yZero + (2.2 * maxRadius + 20)*(Math.sin(Math.radians(firstArcYAngle)));
+	               			//console.log("cy is " + cy)
+	               			firstArcYAngle += 60;
+	               		}
+	               		if(placeInSortY >= 7 && placeInSortY < 19)
+	               		{
+	               			//console.log("secondArcYAngle is " + secondArcYAngle + ", angle y is: " + secondArcYAngle);
+	               			cy = parseInt(yZero + (coefficientOfScale * 3 * maxRadius + 30)*(Math.sin(Math.radians(secondArcYAngle))));
+	               			//console.log("cy is " + cy)
+	               			secondArcYAngle += 30;
+	               		}
+	               		if(placeInSortY >= 19)
+	               		{
+	               			//console.log("thirdArcYAngle is " + thirdArcYAngle + ", angle y is: " + thirdArcYAngle);
+	               			cy = parseInt(yZero + (6 * maxRadius + 30)*(Math.sin(Math.radians(thirdArcYAngle))));
+	               			//console.log("cy is " + cy)
+	               			thirdArcYAngle += 15;
+	               		}
+	               		//console.log("placeInSortY: " + placeInSortY + ", cy is :" + cy)
+	               		locationsY[placeInSortY] = cy;
+	               		placeInSortY += 1; 
+	               		return cy; 
+	               	})
+	               .attr("r", function(d, i) { return d.Value; })
+	               .style("fill", function(d) { 
+	               		if(placeInSort > 1 && placeInSort < 7)
+	               		{
+	               			placeInSort++;
+	               			return colorFirstArcScale(d.Value);
+	               		}
+	               		if(placeInSort < 19)
+	               		{
+	               			placeInSort++;
+	               			return colorSecondArcScale(d.Value);
+	               		}
+	               		if(placeInSort >= 19)
+	               		{
+							placeInSort++;
+							return colorThirdArcScale(d.Value); 
+	               		}
+	               });
+	        
+	        placeInSort = 0;
+	        placeInSortY = 0;            
+            circles.append("text")
+        		.attr("x", function(d) { 
+        			cx = locationsX[placeInSort]
+        			placeInSort++; 
+        			return cx;
+        		})
+				.attr("y", function(d) {
+					cy = locationsY[placeInSortY]
+					placeInSortY++;
+					return cy; 
+				})
+				.attr("transform", "translate(-25,0)")
+                .style("font-size", function(d){ return fontScale(d.Value); })
+			    .style("fill", "black")
+			  	.text(function(d) { return d.COUNTRY;});
+			
+			placeInSort = 0;
+	        placeInSortY = 0;  
+			circles.append("text")
+        		.attr("x", function(d) { 
+        			cx = locationsX[placeInSort]
+        			placeInSort++; 
+        			return cx;
+        		})
+				.attr("y", function(d) {
+					cy = locationsY[placeInSortY]
+					placeInSortY++;
+					return cy; 
+				})
+				.attr("transform", "translate(-23,18)")
+                .style("font-size", function(d){ return fontScale(d.Value); })
+			    .style("fill", "black")
+			  	.text(function(d) { return (Math.round(d.Value*100)/100).toString();});
+		})
+		</script>
+	</body>
+</html>
