@@ -5,50 +5,50 @@
 	<style>
 		p
 		{
-		color:gray; 
-		position: relative; 
-		left: 320px; 
-		font-size: 
-		25px;
+			color:gray; 
+			position: relative; 
+			left: 320px; 
+			font-size: 
+			25px;
 		}
 		h1
 		{
-		color:gray; 
-		position: static; 
-		left: 320px; 
-		font-size: 35px;
-		padding-left: 250px;
+			color:gray; 
+			position: static; 
+			left: 320px; 
+			font-size: 35px;
+			padding-left: 250px;
 		}
 		div.tooltip 
 		{   
-		  position: absolute; 
-		  top: 250px;  
-		  left: 1125px;     
-		  text-align: center; 
-		  font-weight: bold;          
-		  width: 200px;                  
-		  height: 50px;                 
-		  padding: 2px;             
-		  font: 20px sans-serif;        
-		  background: white;   
-		  border: 0px;      
-		  border-radius: 8px;           
-		  pointer-events: none;         
+		    position: absolute; 
+		    top: 250px;  
+		    left: 1125px;     
+		    text-align: center; 
+		    font-weight: bold;          
+		    width: 200px;                  
+		    height: 50px;                 
+		    padding: 2px;             
+		    font: 20px sans-serif;        
+		    background: white;   
+		    border: 0px;      
+		    border-radius: 8px;           
+		    pointer-events: none;         
 		}
 		div.text-Box 
 		{   
-		  position: absolute; 
-		  top: 500px;  
-		  left: 1300px;     
-		  text-align: center; 
-		  font-weight: bold;          
-		  width: 1100px;                  
-		  height: 1200px;                 
-		  padding: 2px;             
-		  font: 20px sans-serif;        
-		  background: white;   
-		  border: 0px;      
-		  border-radius: 8px;                 
+			position: absolute; 
+			top: 500px;  
+			left: 1300px;     
+			text-align: center; 
+			font-weight: bold;          
+			width: 1100px;                  
+			height: 1200px;                 
+			padding: 2px;             
+			font: 20px sans-serif;        
+			background: white;   
+			border: 0px;      
+			border-radius: 8px;                 
 		}
 		.legend
 		{
@@ -117,43 +117,52 @@
 			background: rgba(0,0,0,0.1);
 		}
 	</style>
-	<script src="d3.v3.min.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
 	</head>
 	<body>
 		<h1>Average working hours in a week according to OECD</h1>
 		<p>Final Visualization project by Matan Fintz and Konstantin Streshinsky</p>
 		<script >
-			var color = d3.scale.category20();
-			
+			//create dynamic hover
 			var mydiv = d3.select("body").append("div")   
 			    .attr("class", "tooltip")               
 			    .style("opacity", 0);
 			
+			//converts degrees to radians
 			Math.radians = function(degrees) {
 			  return degrees * Math.PI / 180;
 			};
 
+			//converts degrees to radians
 			Math.degrees = function(radians) {
 			  return radians * 180 / Math.PI;
 			};
+		    
+		    //creates svg element
 		    var canvas = d3.select("body").append("svg")
 				.attr("width", 1800)
 				.attr("height", 1100)
 				.append("g")
 				.attr("transform", "translate(100,100)");
-			var sexValue = "MW", ageValue = "Total", jobTypeValue = "TED", timeValue = "2013", employmentStatusValue = "Total employment";
+			
+			//creates defaults values
+			var sexValue = "MW", ageValue = "Total", jobTypeValue = "TED", 
+				timeValue = "2013", employmentStatusValue = "Total employment";
 			var isDescending = true;
 			var xZeroValue = 550, yZeroValue = 450;
 			var locationsX = [], locationsY = [];
 			var placeInSort = 0, placeInSortY = 0;
 			var minValueTotal, maxValueTotal;
 			var dataTotal;
+			
+			//reading first time csv data
 			d3.csv("finalAll.csv", function (data)
 			{
    				  var xAxis = 0, yAxis = 0, xAxisName = 0, yAxisName = 0;
 				  var firstArcXAngle = 0, firstArcYAngle = 0, xZero = xZeroValue, yZero = yZeroValue, cx, cy;
 				  var secondArcXAngle = 0, secondArcYAngle = 0, thirdArcXAngle = 0, thirdArcYAngle = 0;
 				  var coefficientOfScale = 1.5;
+				  //filtering the data
 				  data = data.filter(function(d) 
 				  { 
 				     if(d["SEX"] == sexValue && d["JOBTYPE"] == jobTypeValue && d["TIME"] == timeValue && 
@@ -166,9 +175,12 @@
 				  data.sort(function(x, y){
 						return d3.descending(x.Value, y.Value);
 				  })
+				  //saving the filtered data of the default values
 				  dataTotal = data;
+				  
 				  var minValue = parseInt(data[data.length - 1].Value); 
 				  var maxValue = parseInt(data[0].Value); 
+				  
 				  minValueTotal = minValue;
 				  maxValueTotal = maxValue;
 				  var maxRadius = coefficientOfScale * maxValue;
@@ -202,8 +214,11 @@
 	                          .enter()
 	                          .append("g")
 	                          .attr("class", "circle");
-					circles.append("circle")
+				  //this time the data not shown to the user that is why it is hidden
+				  //those are the default values only and running only for saving the data
+				  circles.append("circle")
 						.style("visibility", "hidden")
+		                //centers of all bubbles, x-coordinates
 		                .attr("cx", function(d) {
 		               		cx = xZero;
 		               		if(placeInSort >= 1 && placeInSort < 7)
@@ -225,6 +240,7 @@
 		               		placeInSort += 1;  
 		               		return cx; 
 		               	})
+		               //centers of all bubbles, y-coordinates
 		               .attr("cy", function(d) { 
 							cy = yZero;
 							placeInSort = 0;
@@ -247,45 +263,8 @@
 		               		placeInSortY += 1; 
 		               		return cy; 
 		               	})
-		               .attr("r", function(d, i) { return scale(d.Value); })
-		               .style("fill", function(d) { 
-		               		if(placeInSort > 1 && placeInSort < 7)
-		               		{
-		               			placeInSort++;
-		               			return colorFirstArcScale(d.Value);
-		               		}
-		               		if(placeInSort < 19)
-		               		{
-		               			placeInSort++;
-		               			return colorSecondArcScale(d.Value);
-		               		}
-		               		if(placeInSort >= 19)
-		               		{
-								placeInSort++;
-								return colorThirdArcScale(d.Value); 
-		               		}
-		               });
-		        
-		        placeInSort = 0;
-		        placeInSortY = 0;
-
-	            circles.append("text")
-	        		.style("visibility", "hidden")
-	        		.attr("x", function(d) { 
-	        			cx = locationsX[placeInSort]
-	        			placeInSort++; 
-	        			return cx;
-	        		})
-					.attr("y", function(d) {
-						cy = locationsY[placeInSortY]
-						placeInSortY++;
-						return cy; 
-					})
-					.attr("transform", "translate(-15,5)")
-	                .style("font-size", function(d){ return fontScale(d.Value); })
-				    .style("fill", "black")
-				  	.text(function(d) { return d.COUNTRY;});
-					 myFunction2014();
+					   //calling to 2014 values to show the presentation to the user
+					   myFunction2014();
 			});
 
 		    function myFunctionMen() 
@@ -398,14 +377,15 @@
 
 			    d3.csv("finalAll.csv", function (data)
 				{
-					  console.log("gender is " + sexValue + " age is " + ageValue)
-					  d3.selectAll("svg").remove();
-					  d3.selectAll("span").remove();
+					//remove all the previous data
+					d3.selectAll("svg").remove();
+					d3.selectAll("span").remove();
 
 					var legendColor = d3.scale.linear()
 								.domain([minValueTotal, maxValueTotal])
 								.range(["#33F6FF","red"]);
 
+					//creating legend high lable
 					var canvas = d3.select("body")
 								.append("div")
 									.attr("class", "legend")
@@ -419,6 +399,7 @@
 								.attr("height",560)
 
 					var yPlace = 0;
+					//creating legend view
 					var bars = canvas.selectAll("rect")
 								.data(dataTotal)
 								.enter()
@@ -436,7 +417,8 @@
 									 	yPlace+=offset; 
 									 	return yPlace - offset; 
 									 })
-						canvas = d3.select("body")
+					//creating legend low lable
+					canvas = d3.select("body")
 										.append("div")
 										.attr("class", "legend")
 										.append("text")
@@ -445,18 +427,19 @@
 									  	.text(function(){return isDescending == false ? "Highest value of hours" : 
 									  							"Lowest value of hours";})
 
-					  
+					  //creating svg element for presentation
 					  canvas = d3.select("body").append("svg")
 						.attr("width", 1300)
 						.attr("height", 1200)
 						.append("g")
 						.attr("transform", "translate(100,150)");
 					  
-
+					  //init all the values
   					  var xAxis = 0, yAxis = 0, xAxisName = 0, yAxisName = 0;
 					  var firstArcXAngle = 0, firstArcYAngle = 0, xZero = xZeroValue, yZero = yZeroValue, cx, cy;
 					  var secondArcXAngle = 0, secondArcYAngle = 0, thirdArcXAngle = 0, thirdArcYAngle = 0;
 					  var coefficientOfScale = 1.5;
+					  //filtering the data according to user's choice
 					  data = data.filter(function(d) 
 					  { 
 					     if(d["SEX"] == sexValue && d["JOBTYPE"] == jobTypeValue && d["TIME"] == timeValue && 
@@ -466,6 +449,7 @@
 								return d;
 					     }
 					  });
+					  //sort by descending or ascending
 					  if(isDescending)
 					  {
 						  data.sort(function(x, y){
@@ -485,6 +469,7 @@
 
 					  var maxRadius = coefficientOfScale * maxValue;
 
+					  //scale region
 					  var colorFirstArcScale = d3.scale.linear()
 									.domain([data[6].Value,data[0].Value])
 									.range(["#33F6FF","red"]);
@@ -515,10 +500,11 @@
 		                          .append("g")
 		                          .attr("class", "circle");
 
+					 //create 3 imaginary circles
 					 circles.append("circle")        
 					    .attr("cx", xZero)           
 					    .attr("cy", yZeroValue)      
-					    .attr("r", locationsX[1] - xZero)            
+					    .attr("r", Math.abs(locationsY[1] - yZero))            
 					    .style("stroke", "#797D7F") 
 					    .style("stroke-dasharray", ("10, 20"))
 					    .style("fill", "none")
@@ -527,7 +513,7 @@
 					 circles.append("circle")        
 					    .attr("cx", xZero)           
 					    .attr("cy", yZeroValue)      
-					    .attr("r", locationsX[7] - xZero)            
+					    .attr("r", Math.abs(locationsY[7] - yZero))            
 					    .style("stroke", "#797D7F") 
 					    .style("stroke-dasharray", ("10,20"))
 					    .style("fill", "none")
@@ -536,13 +522,16 @@
 					 circles.append("circle")        
 					    .attr("cx", xZero)           
 					    .attr("cy", yZeroValue)      
-					    .attr("r", locationsX[19] - xZero)            
+					    .attr("r", Math.abs(locationsY[19] - yZero))            
 					    .style("stroke", "#797D7F") 
 					    .style("stroke-dasharray", ("10,20"))
 					    .style("fill", "none")
 					    .style("opacity", "0.02");
                            
-					  var rank = [];
+					  //create and show the bubbles to the user
+					  //location are according to the location that were calculated in default part
+					  //radius calculated with appropriate scale
+					  //color is calculated according to scale of its imaginary arc(circle)
 					  circles.append("circle")
 			               .attr("cx", function(d) 
 			                {
@@ -578,7 +567,6 @@
 			               })
 						.on('mouseover', function(d){
 								placeInSort = 0;
-								rank++;
 							    var nodeSelection = d3.select(this).style({opacity:'0.7'});
 							    mydiv.transition()        
 					                .duration(100)      
@@ -589,9 +577,10 @@
 		                .on('mouseout', function(d){
 							      d3.select(this).style({opacity:'1.0',});
 							       mydiv.transition()        
-						                .duration(300)      
+						                .duration(100)      
 						                .style("opacity", 0); 
 							})
+		                //adding titles which include full name of the countries, its rank and hours
 		                .append("title")
 	   						.text(function(d) 
 	   						{ 
@@ -601,7 +590,8 @@
 	   						});
 
 			        placeInSort = 0;
-			        placeInSortY = 0;            
+			        placeInSortY = 0;
+			        //addind names of countries            
 		            circles.append("text")
 		        		.attr("x", function(d) 
 		        		{ 
@@ -620,7 +610,7 @@
 					    .style("fill", "black")
 					  	.text(function(d) { return d.COUNTRY;});
 				});
-		    }//myFunction
+		    }//end myFunction
 
 		</script>
 		 <div class="order">
