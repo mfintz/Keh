@@ -16,5 +16,5 @@ By Matan Fintz and Konstantin Streshinsky
   - Report.pdf - Project's final report
 
 
-To the visualization :
+> To the visualization :
 https://mfintz.github.io/Visualization/index.html
